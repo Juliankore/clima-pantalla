@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Clima en Grande</title>
 
-<!-- Estilos básicos -->
 <style>
     html, body {
         margin: 0;
@@ -72,7 +71,7 @@
 </div>
 
 <script>
-    const apiKey = 'be2ae80d652004de864a30499a8d5197'; // Tu API Key de OpenWeather
+    const apiKey = 'be2ae80d652004de864a30499a8d5197'; // Tu API Key
     const ciudad = 'Cancun,MX';   // Cambia por tu ciudad
     const fondo = 'index.png';    // Cambia por la URL de tu imagen de fondo
 
@@ -80,7 +79,7 @@
 
     async function obtenerClima() {
         try {
-            // Usamos proxy para evitar problemas de CORS
+            // Proxy gratuito para evitar CORS
             const proxy = 'https://api.allorigins.win/raw?url=';
             const url = `${proxy}https://api.openweathermap.org/data/2.5/weather?q=${ciudad}&units=metric&lang=en&appid=${apiKey}`;
             const respuesta = await fetch(url);
