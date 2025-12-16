@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clima en Grande</title>
+
+<!-- Estilos básicos -->
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        font-family: Arial, sans-serif;
+        color: white;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-size: cover;
+        background-position: center;
+    }
+
+    .city {
+        font-size: 3em;
+        margin-bottom: 0.3em;
+        text-shadow: 2px 2px 5px #000;
+    }
+
+    .temperature {
+        font-size: 6em;
+        margin: 0.2em 0;
+        text-shadow: 2px 2px 5px #000;
+    }
+
+    .weather-status {
+        font-size: 2em;
+        text-transform: capitalize;
+        text-shadow: 1px 1px 3px #000;
+    }
+
+    .icon {
+        width: 150px;
+        height: 150px;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: center;
+        gap: 50px;
+        margin-top: 20px;
+        font-size: 1.5em;
+        text-shadow: 1px 1px 3px #000;
+    }
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+
+<div class="city" id="city">Ciudad</div>
+<img class="icon" id="weather-icon" src="">
+<div class="temperature" id="temperature">--°C</div>
+<div class="weather-status" id="weather-status">Cargando...</div>
+
+<div class="info-row">
+    <div>🌬️ <span id="wind">--</span> m/s</div>
+    <div>💧 <span id="humidity">--</span>%</div>
+    <div>📈 <span id="pressure">--</span> hPa</div>
+</div>
+
+<script>
+    const apiKey = 'be2ae80d652004de864a30499a8d5197'; // Tu API Key de OpenWeather
+    const ciudad = 'Cancun,MX';   // Cambia por tu ciudad
+    const fondo = 'index.png';    // Cambia por la URL de tu imagen de fondo
+
+    document.body.style.backgroundImage = `url('${fondo}')`;
+
+    async function obtenerClima() {
+        try {
+            // Usamos proxy para evitar problemas de CORS
+            const proxy = 'https://api.allorigins.win/raw?url=';
+            const url = `${proxy}https://api.openweathermap.org/data/2.5/weather?q=${ciudad}&units=metric&lang=en&appid=${apiKey}`;
+            const respuesta = await fetch(url);
+            const data = await respuesta.json();
+
+            $('#city').text(data.name);
+            $('#temperature').text(Math.round(data.main.temp) + '°C');
+            $('#weather-status').text(data.weather[0].description);
+            $('#wind').text(data.wind.speed);
+            $('#humidity').text(data.main.humidity);
+            $('#pressure').text(data.main.pressure);
+            $('#weather-icon').attr('src', `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`);
+        } catch (error) {
+            console.error('Error al obtener el clima:', error);
+            $('#weather-status').text('No se pudo cargar el clima');
+        }
+    }
+
+    obtenerClima();
+    setInterval(obtenerClima, 600000); // Actualiza cada 10 minutos
+</script>
+
+</body>
+</html>
