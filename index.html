@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,29 +22,10 @@
         background-position: center;
     }
 
-    .city {
-        font-size: 3em;
-        margin-bottom: 0.3em;
-        text-shadow: 2px 2px 5px #000;
-    }
-
-    .temperature {
-        font-size: 6em;
-        margin: 0.2em 0;
-        text-shadow: 2px 2px 5px #000;
-    }
-
-    .weather-status {
-        font-size: 2em;
-        text-transform: capitalize;
-        text-shadow: 1px 1px 3px #000;
-    }
-
-    .icon {
-        width: 150px;
-        height: 150px;
-    }
-
+    .city { font-size: 3em; margin-bottom: 0.3em; text-shadow: 2px 2px 5px #000; }
+    .temperature { font-size: 6em; margin: 0.2em 0; text-shadow: 2px 2px 5px #000; }
+    .weather-status { font-size: 2em; text-transform: capitalize; text-shadow: 1px 1px 3px #000; }
+    .icon { width: 150px; height: 150px; }
     .info-row {
         display: flex;
         justify-content: center;
@@ -54,54 +35,72 @@
         text-shadow: 1px 1px 3px #000;
     }
 </style>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
+
 <body>
 
-<div class="city" id="city">Ciudad</div>
+<div class="city" id="city">Cancún</div>
 <img class="icon" id="weather-icon" src="">
 <div class="temperature" id="temperature">--°C</div>
 <div class="weather-status" id="weather-status">Cargando...</div>
 
 <div class="info-row">
-    <div>🌬️ <span id="wind">--</span> m/s</div>
+    <div>🌬️ <span id="wind">--</span> km/h</div>
     <div>💧 <span id="humidity">--</span>%</div>
     <div>📈 <span id="pressure">--</span> hPa</div>
 </div>
 
 <script>
-    const apiKey = '53f01ce4387c92f1fe9af402a862948f'; // Tu API Key
-    const ciudad = 'Cancun,MX';   // Cambia por tu ciudad
-    const fondo = 'index.png';    // Cambia por la URL de tu imagen de fondo
-
+    const fondo = 'index.png'; // tu fondo personalizado
     document.body.style.backgroundImage = `url('${fondo}')`;
+
+    // Coordenadas exactas de Cancún
+    const lat = 21.1619;
+    const lon = -86.8515;
+
+    // Traducción de códigos de clima Open-Meteo
+    const weatherCodes = {
+        0: { text: "Despejado", icon: "01d" },
+        1: { text: "Mayormente despejado", icon: "02d" },
+        2: { text: "Parcialmente nublado", icon: "03d" },
+        3: { text: "Nublado", icon: "04d" },
+        45: { text: "Niebla", icon: "50d" },
+        48: { text: "Niebla helada", icon: "50d" },
+        51: { text: "Llovizna ligera", icon: "09d" },
+        61: { text: "Lluvia ligera", icon: "10d" },
+        63: { text: "Lluvia moderada", icon: "10d" },
+        65: { text: "Lluvia fuerte", icon: "10d" },
+        80: { text: "Chubascos", icon: "09d" },
+        95: { text: "Tormenta", icon: "11d" }
+    };
 
     async function obtenerClima() {
         try {
-            // Proxy gratuito para evitar CORS
-            const proxy = 'https://api.allorigins.win/raw?url=';
-            const url = `${proxy}https://api.openweathermap.org/data/2.5/weather?q=${ciudad}&units=metric&lang=en&appid=${apiKey}`;
-            const respuesta = await fetch(url);
-            const data = await respuesta.json();
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,weather_code&timezone=auto`;
 
-            $('#city').text(data.name);
-            $('#temperature').text(Math.round(data.main.temp) + '°C');
-            $('#weather-status').text(data.weather[0].description);
-            $('#wind').text(data.wind.speed);
-            $('#humidity').text(data.main.humidity);
-            $('#pressure').text(data.main.pressure);
-            $('#weather-icon').attr('src', `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`);
+            const response = await fetch(url);
+            const data = await response.json();
+
+            const clima = data.current;
+            const info = weatherCodes[clima.weather_code] || { text: "Clima desconocido", icon: "04d" };
+
+            document.getElementById('temperature').textContent = Math.round(clima.temperature_2m) + '°C';
+            document.getElementById('weather-status').textContent = info.text;
+            document.getElementById('wind').textContent = clima.wind_speed_10m;
+            document.getElementById('humidity').textContent = clima.relative_humidity_2m;
+            document.getElementById('pressure').textContent = Math.round(clima.pressure_msl);
+            document.getElementById('weather-icon').src =
+                `https://openweathermap.org/img/wn/${info.icon}@2x.png`;
+
         } catch (error) {
-            console.error('Error al obtener el clima:', error);
-            $('#weather-status').text('No se pudo cargar el clima');
+            console.error(error);
+            document.getElementById('weather-status').textContent = "Error al cargar el clima";
         }
     }
 
     obtenerClima();
-    setInterval(obtenerClima, 600000); // Actualiza cada 10 minutos
+    setInterval(obtenerClima, 600000); // cada 10 minutos
 </script>
 
 </body>
 </html>
-
